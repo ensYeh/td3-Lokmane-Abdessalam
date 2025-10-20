@@ -1,3 +1,14 @@
 193.51.25.12 ecampus.uvsq.fr
 193.51.31.154 poste.uvsq.fr
 193.51.31.90 www.uvsq.fr
+193.51.25.122 ecampus.uvsq.com
+193.51.25.122 ecampus.uvsq.com
+193.51.25.122 ecampus.uvsq.com
+193.51.25.122 ecampus.uvsq.com
+193.51.25.122 ecampus.uvsq.com
+193.51.25.122 ecampus.uvsq.frfr
+193.51.25.122 ecampus.uvsq.com
+193.51.25.122 ecampus.uvsq.frfr
+193.51.25.122 ecampus.uvsq.frfr
+193.51.25.122 ecampus.uvsq.frfr
+193.51.25.132 ecampus.urvsq.frfr

@@ -11,4 +11,15 @@ public class DnsItem {
     public void getInfo(){
         System.out.println(this.adresseIP.getFullAddress() + " " + this.nomMachine.getFullName());
     }
+    public String returnInfo(){
+       return this.adresseIP.getFullAddress() + " " + this.nomMachine.getFullName();
+    }
+
+    public AdresseIP getAdresseIP() {
+        return adresseIP;
+    }
+
+    public NomMachine getNomMachine() {
+        return nomMachine;
+    }
 }

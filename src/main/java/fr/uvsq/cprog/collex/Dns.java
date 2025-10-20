@@ -72,14 +72,13 @@ public class Dns {
                         String domain = parts[1];
 
                         if (ip.equalsIgnoreCase(search) || domain.equalsIgnoreCase(search)) {
-                            System.out.println("✅ Trouvé : " + ip + " " + domain);
-                            return new DnsItem(adresseIP, new NomMachine(domain, domain));
+                            return new DnsItem(adresseIP, new NomMachine(domain));
                         }
                     }
                 }
             }
 
-            throw new Exception("❌ Aucune correspondance trouvée pour : " + adresseIP.getFullAddress());
+            throw new Exception("❌ Aucune correspondance trouvée pour ip : " + adresseIP.getFullAddress());
         }
 
 
@@ -101,7 +100,7 @@ public class Dns {
                 }
             }
         }
-        throw new Exception("❌ Aucune correspondance trouvée pour : " + nomMachine.getFullName());
+        throw new Exception("❌ Aucune correspondance trouvée pour nom machine : " + nomMachine.getFullName());
     }
 
     private List<DnsItem> searchByNomDomain(String filePath, String NomDomain) throws Exception {
@@ -121,10 +120,10 @@ public class Dns {
 
                 }
             }
+            if(results.isEmpty()){
+                throw new Exception("❌ Aucune correspondance trouvée pour : " + NomDomain);
+            }
             return results;
-        }catch (Exception e){
-            throw new Exception("❌ Aucune correspondance trouvée pour : " + NomDomain);
-
         }
     }
 
@@ -160,54 +159,64 @@ public class Dns {
 
 
 
-    // 🔹 Ouvre le fichier défini dans config.properties
+    // 🔹 Ouvre le fichier défini dans config.properties (lecture/écriture possible)
+// Ne crée pas le fichier s'il n'existe pas
     private File openDatabaseFile() throws Exception {
         // Charger le chemin depuis config.properties
-        String filePath;
-        try (InputStream input = Dns.class.getClassLoader().getResourceAsStream("config.properties")) {
-            if (input == null) {
-                throw new FileNotFoundException("⚠️ Fichier config.properties non trouvé !");
-            }
+        String relativePath = loadDatabaseFilePath(); // ex: "storage/dns_db.txt"
 
-            Properties props = new Properties();
-            props.load(input);
-            filePath = props.getProperty("database.file");
+        // Construire le chemin réel vers src/main/resources/
+        File dbFile = new File("src/main/resources/" + relativePath);
 
-            if (filePath == null || filePath.isEmpty()) {
-                throw new Exception("⚠️ La clé 'database.file' est absente du fichier config.properties !");
-            }
+        // Vérifier que le fichier existe
+        if (!dbFile.exists() || !dbFile.isFile()) {
+            throw new FileNotFoundException("⚠️ Fichier de base de données introuvable : " + dbFile.getAbsolutePath());
         }
 
-        // Crée un objet File à partir du chemin trouvé
-        File dbFile = new File(filePath);
-
-        // Si le dossier n’existe pas, le créer
-        if (!dbFile.getParentFile().exists()) {
-            dbFile.getParentFile().mkdirs();
+        // Vérifier que c'est bien un fichier lisible et modifiable
+        if (!dbFile.canRead()) {
+            throw new IOException("⚠️ Le fichier n'est pas lisible : " + dbFile.getAbsolutePath());
         }
-
-        // Si le fichier n’existe pas, le créer
-        if (!dbFile.exists()) {
-            boolean created = dbFile.createNewFile();
-            if (!created) {
-                throw new IOException("❌ Impossible de créer le fichier de base de données : " + dbFile.getAbsolutePath());
-            }
+        if (!dbFile.canWrite()) {
+            throw new IOException("⚠️ Le fichier n'est pas modifiable : " + dbFile.getAbsolutePath());
         }
 
         return dbFile;
     }
 
-    // 🔹 Ajoute une nouvelle entrée IP + NomMachine dans le fichier
-    public void addItem(AdresseIP adresseIP, NomMachine nomMachine) throws Exception {
-        File dbFile = openDatabaseFile();
 
+    public void addItem(AdresseIP adresseIP, NomMachine nomMachine) throws Exception {
+        // Vérifier si l'adresse IP existe déjà
+        try {
+            getItem(adresseIP);
+            throw new Exception("❌ L'adresse IP " + adresseIP.getFullAddress() + " existe déjà !");
+        } catch (Exception e) {
+            // Si aucune correspondance n'est trouvée, on continue
+            if (!e.getMessage().contains("Aucune correspondance trouvée")) {
+                throw e; // Propager l'erreur si c'est un autre problème
+            }
+        }
+
+        // Vérifier si le nom de machine existe déjà
+        try {
+            getItem(nomMachine);
+            throw new Exception("❌ Le nom de machine " + nomMachine.getFullName() + " existe déjà !");
+        } catch (Exception e) {
+            if (!e.getMessage().contains("Aucune correspondance trouvée")) {
+                throw e;
+            }
+        }
+        // Ajouter la nouvelle entrée
+        File dbFile = openDatabaseFile();
         try (FileWriter writer = new FileWriter(dbFile, true)) {
             String newLine = adresseIP.getFullAddress() + " " + nomMachine.getFullName() + "\n";
             writer.write(newLine);
-            System.out.println("✅ Ajouté : " + newLine.trim());
         } catch (IOException e) {
             throw new Exception("❌ Erreur lors de l’ajout dans le fichier : " + e.getMessage());
         }
+//
     }
+
+
 
 }
