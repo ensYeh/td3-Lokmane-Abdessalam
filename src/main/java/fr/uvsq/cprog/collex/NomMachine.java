@@ -8,4 +8,19 @@ public class NomMachine {
         nom_machine = nomMachine;
         nom_domain = nomDomain;
     }
+    public NomMachine(String fullNomMachine) throws Exception{
+        // Vérifier si fullNomMachine est valide
+        if (fullNomMachine == null || fullNomMachine.isEmpty()) {
+            throw new IllegalArgumentException("full Nom Machine ne peut pas être vide ou null");
+        }
+        int idx = fullNomMachine.indexOf('.');
+        if (idx == -1) throw new Exception("full Nom Machine n'ai pas valid");
+
+        nom_machine = fullNomMachine.substring(0, idx);;
+        nom_domain =  fullNomMachine.substring(idx + 1);;
+    }
+
+    String getFullName() {
+        return this.nom_machine + "." + this.nom_domain;
+    }
 }

@@ -8,4 +8,7 @@ public class DnsItem {
         this.adresseIP = adresseIP;
         this.nomMachine = nomMachine;
     }
+    public void getInfo(){
+        System.out.println(this.adresseIP.getFullAddress() + " " + this.nomMachine.getFullName());
+    }
 }
